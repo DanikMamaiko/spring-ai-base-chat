@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Bot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <h1>🤖 AI Assistant</h1>
+        <div class="status">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Online</span>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="message bot-message">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+                <div class="message-text">Привет! Я ваш AI помощник. Задайте мне любой вопрос!</div>
+                <div class="message-time" id="initialTime"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-container">
+        <div class="input-wrapper">
+            <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Введите ваш вопрос..."
+                    maxlength="1000"
+                    autocomplete="off"
+            >
+            <button id="sendButton" class="send-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="input-actions">
+            <label class="stream-toggle">
+                <input type="checkbox" id="streamToggle" checked>
+                <span class="toggle-slider"></span>
+                Режим реального времени
+            </label>
+            <button id="clearButton" class="clear-button">Очистить чат</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
