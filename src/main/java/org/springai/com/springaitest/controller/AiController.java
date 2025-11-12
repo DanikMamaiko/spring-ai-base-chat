@@ -50,6 +50,6 @@ public class AiController {
         });
 
         return response;
-        //return chatModel.stream(question);
+        // return chatModel.stream(question); use, if we don't need to save history in the context
     }
 }
