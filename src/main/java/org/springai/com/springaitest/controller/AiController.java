@@ -29,27 +29,40 @@ public class AiController {
 
     @GetMapping("/ask")
     public Mono<String> ask(@RequestParam String question) {
+        // Оборачиваем вызов chatModel.call(question) в Mono,
+        // чтобы выполнить его асинхронно и не блокировать другие потоки
         return Mono.fromCallable(() -> chatModel.call(question))
+                // Указываем, что выполнение должно происходить на отдельном пуле потоков,
+                // чтобы не блокировать основной (reactive) поток
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
     @GetMapping("/ask-stream")
     public Flux<String> askFlux(@RequestParam String question) {
 
-        UserMessage userMessage = new UserMessage(question);
-        chatMemory.add(conversationId, userMessage);
+        UserMessage userMessage = new UserMessage(question);  // Создаём объект пользовательского сообщения (вопрос)
+        chatMemory.add(conversationId, userMessage);          // Сохраняем сообщение пользователя в память чата
 
-        Prompt prompt = new Prompt(chatMemory.get(conversationId));
+        Prompt prompt = new Prompt(chatMemory.get(conversationId)); // Формируем prompt из всей истории диалога
 
+        // Получаем потоковый (стриминговый) ответ от чат-модели
+        // Преобразуем каждый чанк ответа в текст
         Flux<String> response = chatModel.stream(prompt)
                                          .mapNotNull(chunk -> chunk.getResult().getOutput().getText());
+        // chatModel.stream(prompt) возвращает поток чанков/частей ответа (например, "Зд", "рав", "ствуйте!")
+        // mapNotNull преобразует каждый чанк в строку и убирает null-значения.
 
+        // Собираем все кусочки ответа в один текст, сохраняем в истории как ответ ассистента
         response.collectList().subscribe(fullResponce -> {
-            AssistantMessage assistantMessage = new AssistantMessage(String.join("", fullResponce));
-            chatMemory.add(conversationId, assistantMessage);
+            AssistantMessage assistantMessage = new AssistantMessage(String.join("", fullResponce)); // Склеиваем части в строку
+            chatMemory.add(conversationId, assistantMessage); // Сохраняем сообщение ассистента в память чата
         });
+        // collectList() собирает все части ответа в список, например ["Зд", "рав", "ствуйте!"]
+        // String.join("", fullResponse) даёт "Здравствуйте!"
+        // AssistantMessage("Здравствуйте!") сохраняется в истории, чтобы дальше помнить этот ответ
 
-        return response;
-        // return chatModel.stream(question); use, if we don't need to save history in the context
+        return response;  // Возвращаем поток строк, чтобы клиент мог получать ответ частями (стриминг)
+
+        // return chatModel.stream(question); // Можно вернуть так, если не нужна история сообщений
     }
 }
